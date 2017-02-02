@@ -31,8 +31,7 @@ module Linkedin
     def initialize(url, options = {})
       @linkedin_url = url
       @options = options
-      # @page = http_client.get(url)
-      @page = http_client.get("http://localhost:3000/linkedin_profile.htm")
+      @page = http_client.get(url)
 
       companies = []
     end
