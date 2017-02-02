@@ -183,18 +183,21 @@ module Linkedin
     end
 
     def projects
-      @projects ||= @page.search('#projects .project').map do |node|
-        project = {}
-        start_date, end_date = node.at('.date-range').text.gsub(/\s+|\n/, ' ').strip.split(' – ') rescue nil
+      @projects = []
 
-        project[:title] = node.at('.item-title').text
-        project[:link] = CGI.parse(URI.parse(node.at('.item-title a')['href']).query)['url'][0] rescue nil
-        project[:start_date] = parse_date(start_date) rescue nil
-        project[:end_date] = parse_date(end_date) rescue nil
-        project[:description] = node.at('.description').children().to_s rescue nil
-        project[:associates] = node.search('.contributors .contributor').map { |c| c.at('a').text } rescue nil
-        project
+      @page.search('#background-projects > .entity-container').each do |node|
+        project = {}
+
+        project[:title]      = node.search('header > .main-header-field > .field-text').text
+        project[:start_date] = Date.parse(node.search(".date-header-field > span > time")[0]&.text) rescue nil
+        project[:end_date]   = Date.parse(node.search(".date-header-field > span > time")[1]&.text) rescue nil
+        project[:end_date]  ||= "Present"
+        project[:description] = node.find('.body-field.field.description > span.field-text')
+
+        @projects << project
       end
+
+      @projects
     end
 
     def to_json
