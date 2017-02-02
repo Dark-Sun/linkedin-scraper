@@ -31,7 +31,10 @@ module Linkedin
     def initialize(url, options = {})
       @linkedin_url = url
       @options = options
-      @page = http_client.get(url)
+      # @page = http_client.get(url)
+      @page = http_client.get("http://localhost:3000/linkedin_profile.htm")
+
+      companies = []
     end
 
     def awards
@@ -224,32 +227,34 @@ module Linkedin
         @companies = []
       end
 
-      @page.search('.positions .position').each do |node|
+      @page.search("[id^=experience]").each do |node|
+        title = node.search(".main-header-field > span")&.text
+
+        next if title.empty?
+
+        company =  node.search(".sub-header-field > span")&.text
+        start_date = node.search(".date-header-field > span > time")[0]&.text
+        end_date = node.search(".date-header-field > span > time")[1]&.text
+        description = node.search(".body-field > .field-text")&.text
+
         company = {}
-        company[:title] = node.at('.item-title').text.gsub(/\s+|\n/, ' ').strip if node.at('.item-title')
-        company[:company] = node.at('.item-subtitle').text.gsub(/\s+|\n/, ' ').strip if node.at('.item-subtitle')
-        company[:location] = node.at('.location').text if node.at('.location')
-        company[:description] = node.at('.description').text.gsub(/\s+|\n/, ' ').strip if node.at('.description')
-        company[:company_logo] = node.at('.logo a img').first[1] if node.at('.logo')
+        title = node.search(".main-header-field > span")&.text
+        next unless title
 
-        start_date, end_date = node.at('.date-range').text.strip.split(' – ') rescue nil
-        company[:duration] = node.at('.date-range').text[/.*\((.*)\)/, 1]
-        company[:start_date] = parse_date(start_date) rescue nil
+        company[:title] = title
+        company[:company] = node.search(".sub-header-field > span")&.text
+        company[:location] = ""
+        company[:description] = node.search(".body-field > .field-text")&.text
+        company[:start_date] = node.search(".date-header-field > span > time")[0]&.text
 
-        if end_date && end_date.match(/Present/)
-          company[:end_date] = 'Present'
-        else
-          company[:end_date] = parse_date(end_date) rescue nil
-        end
-
-        company_link = node.at('.item-subtitle').at('a')['href'] rescue nil
-        if @options[:company_details] && company_link
-          company.merge!(get_company_details(company_link))
-        end
+        company[:start_date] = Date.parse(node.search(".date-header-field > span > time")[0]&.text) rescue nil
+        company[:end_date]   = Date.parse(node.search(".date-header-field > span > time")[1]&.text) rescue nil
+        company[:end_date]  ||= "Present"
 
         @companies << company
       end
 
+      @companies.uniq! { |c| c[:title] && c[:start_date] && c[:end_date] }
       @companies
     end
 
