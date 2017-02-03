@@ -197,7 +197,7 @@ module Linkedin
 
           @projects << project
         rescue => e
-          nil
+          puts e
         end
       end
 
