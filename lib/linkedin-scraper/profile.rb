@@ -189,7 +189,7 @@ module Linkedin
         begin
           project = {}
 
-          project[:title]      = node.search('h4 > a.external-link').text
+          project[:title]      = node.search('h4 > a')&.text
           project[:start_date] = Date.parse(node.search(".meta > time")[0]&.text)
           project[:end_date]   = Date.parse(node.search(".meta > time")[1]&.text)
           project[:end_date]  ||= "Present"
