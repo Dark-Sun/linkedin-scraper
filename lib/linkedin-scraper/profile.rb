@@ -185,14 +185,14 @@ module Linkedin
     def projects
       @projects = []
 
-      @page.search('#background-projects > .entity-container').each do |node|
+      @page.search('#projects > ul > .project').each do |node|
         project = {}
 
-        project[:title]      = node.search('header > .main-header-field > .field-text').text
-        project[:start_date] = Date.parse(node.search(".date-header-field > span > time")[0]&.text) rescue nil
-        project[:end_date]   = Date.parse(node.search(".date-header-field > span > time")[1]&.text) rescue nil
+        project[:title]      = node.search('h4 > a.external-link').text
+        project[:start_date] = Date.parse(node.search(".meta > time")[0]&.text) rescue nil
+        project[:end_date]   = Date.parse(node.search(".meta > time")[1]&.text) rescue nil
         project[:end_date]  ||= "Present"
-        project[:description] = node.find('.body-field.field.description > span.field-text')
+        project[:description] = node.find('.description')
 
         @projects << project
       end
