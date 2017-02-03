@@ -32,6 +32,7 @@ module Linkedin
       @linkedin_url = url
       @options = options
       @page = http_client.get(url)
+      # @page = http_client.get("http://localhost:3000/linkedin_profile.htm")
 
       companies = []
     end
@@ -229,32 +230,36 @@ module Linkedin
         @companies = []
       end
 
-      @page.search("[id^=experience]").each do |node|
-        title = node.search(".main-header-field > span")&.text
+      def get_companies
+        if @companies
+          return @companies
+        else
+          @companies = []
+        end
+
+        @page.search("#experience > ul > .position").each do |node|
+        title = node.search(".item-title")&.text
 
         next if title.empty?
 
-        company =  node.search(".sub-header-field > span")&.text
-        start_date = node.search(".date-header-field > span > time")[0]&.text
-        end_date = node.search(".date-header-field > span > time")[1]&.text
+        company_name     = node.search(".item-subtitle")&.text
+        start_date       = Date.parse(node.search(".date-range > time")[0]&.text) rescue nil
+        end_date         = Date.parse(node.search(".date-range > time")[1]&.text) rescue nil
+        end_date       ||= "Present"
         description = node.search(".body-field > .field-text")&.text
-
         company = {}
-        title = node.search(".main-header-field > span")&.text
-        next unless title
-
         company[:title] = title
-        company[:company] = node.search(".sub-header-field > span")&.text
+        company[:company] = company_name
         company[:location] = ""
-        company[:description] = node.search(".body-field > .field-text")&.text
-        company[:start_date] = node.search(".date-header-field > span > time")[0]&.text
-
-        company[:start_date] = Date.parse(node.search(".date-header-field > span > time")[0]&.text) rescue nil
-        company[:end_date]   = Date.parse(node.search(".date-header-field > span > time")[1]&.text) rescue nil
-        company[:end_date]  ||= "Present"
+        company[:start_date] = start_date
+        company[:end_date]   = end_date
 
         @companies << company
       end
+
+      @companies.uniq! { |c| c[:title] && c[:start_date] && c[:end_date] }
+      @companies
+     end
 
       @companies.uniq! { |c| c[:title] && c[:start_date] && c[:end_date] }
       @companies
