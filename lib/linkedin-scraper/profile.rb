@@ -35,6 +35,10 @@ module Linkedin
       # @page = http_client.get("http://localhost:3000/linkedin_profile.htm")
 
       companies = []
+
+      @page.search('#projects > ul > .project').each do |node|
+        p node
+      end
     end
 
     def awards
@@ -189,11 +193,11 @@ module Linkedin
         begin
           project = {}
 
-          project[:title]      = node.search('h4 > a')&.text
-          project[:start_date] = Date.parse(node.search(".meta > time")[0]&.text)
-          project[:end_date]   = Date.parse(node.search(".meta > time")[1]&.text)
+          project[:title]      = node.search('.item-title > a')&.text
+          project[:start_date] = Date.parse(node.search(".date-range > time")[0]&.text)
+          project[:end_date]   = Date.parse(node.search(".date-range > time")[1]&.text)
           project[:end_date]  ||= "Present"
-          project[:description] = node.find('.description')&.text
+          project[:description] = node.search('.description')&.text
 
           @projects << project
         rescue => e
