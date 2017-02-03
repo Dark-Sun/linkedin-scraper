@@ -196,7 +196,8 @@ module Linkedin
           project[:description] = node.find('.description')&.text
 
           @projects << project
-        rescue nil
+        rescue => e
+          nil
         end
       end
 
