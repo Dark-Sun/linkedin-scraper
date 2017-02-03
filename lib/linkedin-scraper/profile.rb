@@ -186,15 +186,18 @@ module Linkedin
       @projects = []
 
       @page.search('#projects > ul > .project').each do |node|
-        project = {}
+        begin
+          project = {}
 
-        project[:title]      = node.search('h4 > a.external-link').text
-        project[:start_date] = Date.parse(node.search(".meta > time")[0]&.text) rescue nil
-        project[:end_date]   = Date.parse(node.search(".meta > time")[1]&.text) rescue nil
-        project[:end_date]  ||= "Present"
-        project[:description] = node.find('.description')
+          project[:title]      = node.search('h4 > a.external-link').text
+          project[:start_date] = Date.parse(node.search(".meta > time")[0]&.text)
+          project[:end_date]   = Date.parse(node.search(".meta > time")[1]&.text)
+          project[:end_date]  ||= "Present"
+          project[:description] = node.find('.description')&.text
 
-        @projects << project
+          @projects << project
+        rescue nil
+        end
       end
 
       @projects
