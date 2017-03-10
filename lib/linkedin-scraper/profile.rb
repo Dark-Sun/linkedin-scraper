@@ -32,13 +32,6 @@ module Linkedin
       @linkedin_url = url
       @options = options
       @page = http_client.get(url)
-      # @page = http_client.get("http://localhost:3000/linkedin_profile.htm")
-
-      companies = []
-
-      @page.search('#projects > ul > .project').each do |node|
-        p node
-      end
     end
 
     def awards
@@ -194,8 +187,8 @@ module Linkedin
           project = {}
 
           project[:title]      = node.search('.item-title > a')&.text
-          project[:start_date] = Date.parse(node.search(".date-range > time")[0]&.text)
-          project[:end_date]   = Date.parse(node.search(".date-range > time")[1]&.text)
+          project[:start_date] = Date.parse(node.search(".date-range > time")[0]&.text) rescue nil
+          project[:end_date]   = Date.parse(node.search(".date-range > time")[1]&.text) rescue nil
           project[:end_date]  ||= "Present"
           project[:description] = node.search('.description')&.text
 
@@ -238,38 +231,33 @@ module Linkedin
         @companies = []
       end
 
-      def get_companies
-        if @companies
-          return @companies
-        else
-          @companies = []
-        end
-
-        @page.search("#experience > ul > .position").each do |node|
+      @page.search("#experience > ul > .position").each do |node|
         title = node.search(".item-title")&.text
 
         next if title.empty?
 
         company_name     = node.search(".item-subtitle")&.text
+
         start_date       = Date.parse(node.search(".date-range > time")[0]&.text) rescue nil
+        start_date     ||= Date.strptime(node.search(".date-range > time")[0]&.text, '%Y') rescue nil
+
         end_date         = Date.parse(node.search(".date-range > time")[1]&.text) rescue nil
-        end_date       ||= "Present"
-        description = node.search(".body-field > .field-text")&.text
+        end_date       ||= Date.strptime(node.search(".date-range > time")[1]&.text, '%Y') rescue nil
+        end_date       ||= "Present" if start_date
+
+        description = node.search(".description")&.text
+
         company = {}
         company[:title] = title
         company[:company] = company_name
         company[:location] = ""
         company[:start_date] = start_date
         company[:end_date]   = end_date
+        company[:description] = description
 
         @companies << company
       end
 
-      @companies.uniq! { |c| c[:title] && c[:start_date] && c[:end_date] }
-      @companies
-     end
-
-      @companies.uniq! { |c| c[:title] && c[:start_date] && c[:end_date] }
       @companies
     end
 
