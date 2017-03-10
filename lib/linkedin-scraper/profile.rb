@@ -150,8 +150,8 @@ module Linkedin
 
     def languages
       @languages ||= @page.search('#languages ul li').map do |item|
-        language = item.at('h4').text.strip rescue nil
-        proficiency = item.at('p.proficiency').text.gsub(/\s+|\n/, ' ').strip rescue nil
+        language = item.search('h4').text rescue nil
+        proficiency = item.search('p.proficiency').text.gsub(/\s+|\n/, ' ').strip rescue nil
         { language: language, proficiency: proficiency }
       end
     end
