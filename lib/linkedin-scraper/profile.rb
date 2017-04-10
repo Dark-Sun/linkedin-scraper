@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+
 module Linkedin
   class Profile
     ATTRIBUTES = %w(
@@ -32,6 +33,7 @@ module Linkedin
       @linkedin_url = url
       @options = options
       @page = http_client.get(url)
+      pp @page
     end
 
     def awards
@@ -293,15 +295,18 @@ module Linkedin
     end
 
     def http_client
+
       @http_client ||= Mechanize.new do |agent|
         agent.user_agent = Linkedin::UserAgent.randomize
         if !@options.empty?
           agent.set_proxy(@options[:proxy_ip], @options[:proxy_port], @options[:username], @options[:password])
+          agent.agent.set_socks(@options[:socks_host], @options[:socks_port])
           agent.open_timeout = @options[:open_timeout]
           agent.read_timeout = @options[:read_timeout]
+          agent.max_history = 0
         end
-        agent.max_history = 0
       end
+
     end
 
     def get_linkedin_company_url(link)

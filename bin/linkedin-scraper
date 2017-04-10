@@ -9,5 +9,7 @@ options[:username] = ARGV[3]
 options[:password] = ARGV[4]
 options[:company_details] = ARGV[5]
 
+# options[:socks_host] = '127.0.0.1'
+# options[:socks_port] = '9050'
 profile = Linkedin::Profile.new(ARGV[0], options)
 puts JSON.pretty_generate JSON.parse(profile.to_json)
