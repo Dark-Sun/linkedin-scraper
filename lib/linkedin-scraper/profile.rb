@@ -33,7 +33,6 @@ module Linkedin
       @linkedin_url = url
       @options = options
       @page = http_client.get(url)
-      pp @page
     end
 
     def awards
