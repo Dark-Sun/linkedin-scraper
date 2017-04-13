@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-
 module Linkedin
   class Profile
     ATTRIBUTES = %w(
@@ -305,7 +304,6 @@ module Linkedin
           agent.max_history = 0
         end
       end
-
     end
 
     def get_linkedin_company_url(link)
